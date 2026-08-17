@@ -32,7 +32,7 @@ jobs:
           unzip -o native-android-src.zip -d native-app
 
       - name: Generate signing keystore
-        working-directory: native-app
+        working-directory: native-app/app
         run: |
           keytool -genkeypair -v \
             -keystore cottonmap-native.keystore \
