@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>CottonMap — Protótipo v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --cotton:#F6F3EC; --cotton-2:#EFEADE; --soil:#5B3A29; --soil-2:#8A5A3B;
+    --leaf:#3F5B3F; --leaf-2:#5C7A56; --boll:#FBFAF6; --abort:#8C3B3B;
+    --ink:#2B241D; --line:#D8D0C0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 20px; min-height:100vh;
+    background: radial-gradient(circle at 20% 10%, #efe9da 0%, #e3ddca 55%, #d9d2bd 100%);
+    font-family:'Inter',sans-serif;
+    display:flex; flex-wrap:wrap; gap:36px; align-items:flex-start; justify-content:center;
+  }
+  .stagelabel{ font-family:'Fraunces',serif; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--soil); margin:0 0 10px 4px; font-weight:600;}
+  .stage{ display:flex; flex-direction:column; align-items:center; }
+  .phone{
+    width:330px; height:700px; background:var(--cotton); border-radius:34px; border:8px solid var(--ink);
+    box-shadow:0 22px 45px rgba(43,36,29,.28), inset 0 0 0 1px rgba(255,255,255,.4);
+    overflow:hidden; position:relative; display:flex; flex-direction:column;
+  }
+  .notch{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:20px; background:var(--ink); border-radius:0 0 14px 14px; z-index:5;}
+  .topbar{ background:var(--soil); color:var(--cotton); padding:26px 18px 14px; font-family:'Fraunces',serif; display:flex; align-items:center; justify-content:space-between;}
+  .brand{ font-size:17px; font-weight:700; letter-spacing:.02em;}
+  .brand span{ color:#D8C9A3; }
+  .topsub{ font-size:10.5px; color:#D8C9A3; font-family:'Inter',sans-serif; margin-top:2px;}
+  .screen{ flex:1; overflow-y:auto; padding:18px 16px 24px; }
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:11px; color:var(--soil-2); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;}
+  .field input, .field select{ width:100%; padding:10px 11px; border-radius:9px; border:1.5px solid var(--line); background:#fff; font-size:13.5px; font-family:'Inter',sans-serif; color:var(--ink);}
+  .row2{ display:flex; gap:10px; } .row2 .field{ flex:1; }
+  .btn-primary{ width:100%; padding:13px; margin-top:8px; border:none; border-radius:11px; background:var(--leaf); color:#fff; font-weight:700; font-size:14px; font-family:'Inter',sans-serif; letter-spacing:.02em; cursor:pointer;}
+  .btn-ghost{ width:100%; padding:11px; margin-top:8px; border:1.5px solid var(--soil-2); border-radius:11px; background:transparent; color:var(--soil); font-weight:600; font-size:13px; cursor:pointer;}
+
+  /* login */
+  .loginWrap{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 24px; text-align:center;}
+  .logoMark{ font-size:44px; margin-bottom:10px; }
+  .loginWrap h1{ font-family:'Fraunces',serif; font-size:24px; margin:0 0 4px; color:var(--ink);}
+  .loginWrap p{ font-size:12.5px; color:#6b6455; margin:0 0 28px; line-height:1.5;}
+  .gbtn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; border:1.5px solid var(--line); border-radius:11px; padding:12px; font-weight:700; font-size:13.5px; color:var(--ink); cursor:pointer; margin-bottom:10px;}
+  .gbtn .gico{ width:18px; height:18px; border-radius:4px; background:conic-gradient(#EA4335 0 25%, #4285F4 25% 50%, #34A853 50% 75%, #FBBC05 75% 100%); display:inline-block;}
+  .gsync{ font-size:10.5px; color:var(--leaf); background:#EDF1E9; border-radius:8px; padding:8px 10px; line-height:1.4; margin-top:14px;}
+  .divline{ display:flex; align-items:center; gap:8px; color:#a89f8c; font-size:11px; margin:14px 0;}
+  .divline::before, .divline::after{ content:""; flex:1; height:1px; background:var(--line);}
+
+  /* lists (ensaio > tratamentos, tratamento > pontos) */
+  .listCard{ background:#fff; border:1.5px solid var(--line); border-radius:13px; padding:12px 13px; margin-bottom:10px; cursor:pointer;}
+  .listCard .top{ display:flex; justify-content:space-between; align-items:center;}
+  .listCard h4{ margin:0; font-family:'Fraunces',serif; font-size:14.5px; color:var(--ink);}
+  .tag{ font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em;}
+  .tag.ok{ background:#EDF1E9; color:var(--leaf);}
+  .tag.mid{ background:#F3E9DA; color:var(--soil-2);}
+  .tag.new{ background:#efe4e4; color:var(--abort);}
+  .listCard .meta{ font-size:11px; color:#8a8272; margin-top:4px;}
+  .progressbar{ height:5px; border-radius:6px; background:var(--cotton-2); margin-top:8px; overflow:hidden;}
+  .progressbar i{ display:block; height:100%; background:var(--leaf-2); }
+  .fab{ position:absolute; right:16px; bottom:16px; width:46px; height:46px; border-radius:50%; background:var(--ink); color:#fff; font-size:22px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,.3); cursor:pointer;}
+  .breadcrumb{ font-size:10.5px; color:#a89f8c; margin-bottom:2px;}
+
+  /* plant screen */
+  .plantHead{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
+  .plantHead h2{ font-family:'Fraunces',serif; font-size:19px; margin:0; color:var(--ink);}
+  .plantHead .cnt{ font-size:12px; color:var(--soil-2); font-weight:600;}
+  .alturaBox{ display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:8px 10px; margin:8px 0 12px;}
+  .alturaBox label{ font-size:10.5px; font-weight:700; color:var(--soil-2); text-transform:uppercase; letter-spacing:.04em; flex-shrink:0;}
+  .alturaBox input{ border:none; background:transparent; font-size:15px; font-weight:700; color:var(--ink); width:100%; text-align:right; font-family:'Fraunces',serif;}
+  .alturaBox .unit{ font-size:11px; color:#a89f8c; }
+  .stem{ background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:10px 8px 6px; max-height:250px; overflow-y:auto;}
+  .node{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dashed #e6e0d2;}
+  .node:last-child{ border-bottom:none; }
+  .node.active{ background:#F1EEE2; border-radius:8px; }
+  .nodeNum{ width:24px; height:24px; border-radius:50%; background:var(--cotton-2); color:var(--soil); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1.5px solid var(--line);}
+  .node.active .nodeNum{ background:var(--leaf); color:#fff; border-color:var(--leaf); }
+  .node.done .nodeNum{ background:#e2e6da; color:#9aa38f; border-color:#e2e6da; }
+  .chips{ display:flex; gap:4px; flex-wrap:wrap; flex:1; min-height:20px;}
+  .chip{ font-size:14px; background:var(--cotton-2); border-radius:6px; padding:1px 5px; }
+  .nodeCheck{ font-size:11px; color:#9aa38f; font-style:italic; }
+  .actionZone{ margin-top:12px; }
+  .bigrow{ display:flex; gap:10px; margin-bottom:8px; }
+  .bigbtn{ flex:1; border:none; border-radius:13px; padding:14px 6px; text-align:center; cursor:pointer; font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px; color:#fff;}
+  .bigbtn .ic{ display:block; font-size:26px; margin-bottom:3px; }
+  .bigbtn.capulho{ background:var(--soil-2); }
+  .bigbtn.aborto{ background:var(--abort); }
+  .smallrow{ display:flex; gap:6px; margin-bottom:8px; }
+  .smallbtn{ flex:1; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:8px 2px; text-align:center; cursor:pointer; font-size:19px;}
+  .smallbtn .lbl{ display:block; font-size:8.3px; margin-top:2px; color:var(--soil-2); font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
+  .checkbtn{ width:100%; padding:12px; border:1.5px solid var(--leaf-2); border-radius:11px; background:#EDF1E9; color:var(--leaf); font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:8px;}
+  .footbtn{ width:100%; padding:13px; border:none; border-radius:11px; background:var(--ink); color:#fff; font-weight:700; font-size:13.5px; cursor:pointer;}
+
+  /* report w/ plant nav */
+  .plantNav{ display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid var(--line); border-radius:11px; padding:8px 10px; margin-bottom:12px;}
+  .plantNav .arrow{ width:30px; height:30px; border-radius:50%; background:var(--cotton-2); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--soil); cursor:pointer; flex-shrink:0;}
+  .plantNav .center{ text-align:center; }
+  .plantNav .center b{ font-family:'Fraunces',serif; font-size:14.5px; color:var(--ink); display:block;}
+  .plantNav .center span{ font-size:10.5px; color:#8a8272;}
+  .dots{ display:flex; gap:4px; justify-content:center; margin-top:6px;}
+  .dots i{ width:6px; height:6px; border-radius:50%; background:var(--line); display:block;}
+  .dots i.on{ background:var(--leaf); }
+  .reportCard{ background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px;}
+  .reportCard h4{ margin:0 0 6px; font-family:'Fraunces',serif; font-size:13.5px; color:var(--soil);}
+  table.rep{ width:100%; border-collapse:collapse; font-size:10.5px;}
+  table.rep th, table.rep td{ border:1px solid var(--line); padding:3px 4px; text-align:center;}
+  table.rep th{ background:var(--cotton-2); color:var(--soil); font-size:9px;}
+  .legend{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .legend span{ font-size:9.5px; color:#6b6455;}
+
+  /* comparativo */
+  .cmpRow{ margin-bottom:14px; }
+  .cmpRow .lbl{ display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; color:var(--ink); margin-bottom:4px;}
+  .cmpRow .lbl span{ color:var(--soil-2); font-weight:600; }
+  .cmpBar{ height:16px; border-radius:8px; background:var(--cotton-2); overflow:hidden; position:relative;}
+  .cmpBar i{ display:block; height:100%; border-radius:8px; }
+  .best{ background:var(--leaf); }
+  .mid2{ background:#9BAE8E; }
+  .low{ background:#C9BE9E; }
+  .cmpMeta{ font-size:9.5px; color:#a89f8c; margin-top:3px;}
+
+  /* chart bars (comparativo) */
+  .chartWrap{ display:flex; align-items:flex-end; gap:14px; height:150px; padding:0 6px 4px; border-bottom:1.5px solid var(--line);}
+  .chartCol{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .chartCol .val{ font-size:11px; font-weight:700; color:var(--ink); margin-bottom:4px;}
+  .chartCol .bar{ width:34px; border-radius:8px 8px 3px 3px; }
+  .chartAxis{ display:flex; gap:14px; padding:6px 6px 0; }
+  .chartAxis span{ flex:1; text-align:center; font-size:9.5px; font-weight:700; color:var(--soil-2);}
+  .chartLegend{ display:flex; justify-content:center; gap:14px; margin-top:10px; }
+  .chartLegend .li{ display:flex; align-items:center; gap:5px; font-size:10px; color:#6b6455;}
+  .chartLegend .sw{ width:9px; height:9px; border-radius:3px; }
+
+  .caption{ max-width:330px; text-align:center; font-size:12px; color:#6b6455; margin-top:10px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <p class="stagelabel">00 · Login</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screen loginWrap">
+      <div class="logoMark">🌱</div>
+      <h1>Cotton<span style="color:var(--soil-2)">Map</span></h1>
+      <p>Mapeamento reprodutivo do algodoeiro direto no campo, sincronizado com sua conta.</p>
+      <button class="gbtn"><span class="gico"></span> Entrar com Google</button>
+      <div class="divline">ou</div>
+      <button class="btn-ghost">Entrar com e-mail e senha</button>
+      <div class="gsync">🔒 Ao entrar com Google, seus ensaios, fotos e relatórios ficam salvos e sincronizados automaticamente no Google Drive vinculado à sua conta.</div>
+    </div>
+  </div>
+  <p class="caption">Login social evita cadastro de senha extra e já resolve backup/sincronização entre celular e computador.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">00b · Selecionar / criar ensaio</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar"><div><div class="brand">Cotton<span>Map</span></div><div class="topsub">Meus ensaios</div></div></div>
+    <div class="screen">
+      <div class="listCard">
+        <div class="top"><h4>Lote 27 — Safra 25/26</h4><span class="tag mid">em andamento</span></div>
+        <div class="meta">AgBi.Tech · 4 tratamentos</div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>Lote 14 — Safra 25/26</h4><span class="tag ok">completo</span></div>
+        <div class="meta">AgBi.Tech · 3 tratamentos</div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>Lote 09 — Safra 24/25</h4><span class="tag ok">completo</span></div>
+        <div class="meta">Fazenda Rio Verde · 5 tratamentos</div>
+      </div>
+      <button class="btn-primary">+ Criar novo ensaio</button>
+    </div>
+  </div>
+  <p class="caption">Tela inicial após o login. Escolher um ensaio existente leva direto pra tela de tratamentos (01). "Criar novo ensaio" abre o formulário de cadastro abaixo.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">01 · Ensaio → Tratamentos</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar">
+      <div><div class="brand">Cotton<span>Map</span></div><div class="topsub">Ensaio: Lote 27 — Safra 25/26</div></div>
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">📊</div>
+    </div>
+    <div class="screen">
+      <div class="listCard">
+        <div class="top"><h4>T1 · Testemunha</h4><span class="tag ok">completo</span></div>
+        <div class="meta">3 pontos no talhão · 18 plantas avaliadas</div>
+        <div class="progressbar"><i style="width:100%"></i></div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>T2 · Produto A</h4><span class="tag ok">completo</span></div>
+        <div class="meta">3 pontos no talhão · 18 plantas avaliadas</div>
+        <div class="progressbar"><i style="width:100%"></i></div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>T3 · Produto B</h4><span class="tag mid">em andamento</span></div>
+        <div class="meta">2 de 3 pontos · 12 de 18 plantas</div>
+        <div class="progressbar"><i style="width:66%"></i></div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>T4 · Produto C</h4><span class="tag new">não iniciado</span></div>
+        <div class="meta">0 de 3 pontos</div>
+        <div class="progressbar"><i style="width:0%"></i></div>
+      </div>
+    </div>
+    <div class="fab">+</div>
+  </div>
+  <p class="caption">Um ensaio agrupa vários tratamentos (produtos). Cada tratamento é acompanhado individualmente e pode ser aberto a qualquer momento.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">02 · Tratamento → Pontos do talhão</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar"><div><div class="brand">Cotton<span>Map</span></div><div class="topsub">T3 · Produto B</div></div></div>
+    <div class="screen">
+      <p class="breadcrumb">Lote 27 / T3 · Produto B</p>
+      <div class="listCard">
+        <div class="top"><h4>Ponto 1 (Rep 01)</h4><span class="tag ok">completo</span></div>
+        <div class="meta">6 plantas · 2,23 plantas/m</div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>Ponto 2 (Rep 02)</h4><span class="tag ok">completo</span></div>
+        <div class="meta">6 plantas · 2,18 plantas/m</div>
+      </div>
+      <div class="listCard">
+        <div class="top"><h4>Ponto 3 (Rep 03)</h4><span class="tag mid">em andamento</span></div>
+        <div class="meta">3 de 6 plantas</div>
+        <div class="progressbar"><i style="width:50%"></i></div>
+      </div>
+      <button class="btn-ghost" style="margin-top:6px;">+ Novo ponto de avaliação</button>
+    </div>
+    <div class="fab">📊</div>
+  </div>
+  <p class="caption">Cada ponto no talhão = uma repetição (igual à sua caderneta: "Rep 01", "Rep 02"...). O ícone 📊 abre o resumo só desse tratamento.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">03 · Mapeamento — com altura editável</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar"><div><div class="brand">Cotton<span>Map</span></div><div class="topsub">T3 · Ponto 3 · Rep 03</div></div></div>
+    <div class="screen">
+      <div class="plantHead"><h2>Planta 4</h2><span class="cnt">4 / 6</span></div>
+      <div class="alturaBox">
+        <label>Altura</label>
+        <input value="1,43" inputmode="decimal">
+        <span class="unit">m</span>
+      </div>
+      <div class="stem">
+        <div class="node done"><div class="nodeNum">8</div><div class="chips"><span class="chip">🍏</span><span class="chip">🍏</span></div></div>
+        <div class="node done"><div class="nodeNum">7</div><div class="chips"><span class="chip">🍏</span></div></div>
+        <div class="node done"><div class="nodeNum">6</div><div class="chips"><span class="chip">🍏</span><span class="chip">⚪</span></div></div>
+        <div class="node done"><div class="nodeNum">5</div><div class="chips"><span class="nodeCheck">sem estrutura</span></div></div>
+        <div class="node active"><div class="nodeNum">9</div><div class="chips"><span class="chip">🍏</span></div></div>
+      </div>
+      <div class="actionZone">
+        <button class="checkbtn">✔ Concluir ramo 9 (sem mais estruturas)</button>
+        <div class="bigrow">
+          <button class="bigbtn aborto"><span class="ic">💀</span>Aborto</button>
+          <button class="bigbtn capulho"><span class="ic">⚪</span>Capulho</button>
+        </div>
+        <div class="smallrow">
+          <div class="smallbtn">🌱<span class="lbl">Botão</span></div>
+          <div class="smallbtn">🌷<span class="lbl">Flor</span></div>
+          <div class="smallbtn">🍏<span class="lbl">Maçã v.</span></div>
+          <div class="smallbtn">🌀<span class="lbl">Cavit.</span></div>
+          <div class="smallbtn">🟤<span class="lbl">Podre</span></div>
+        </div>
+        <button class="footbtn">Planta concluída ✅ → próxima</button>
+      </div>
+    </div>
+  </div>
+  <p class="caption">Altura fica editável no topo de cada planta (mesmo campo "Altura" da caderneta). Botões Aborto/Capulho trocados de posição, como pedido.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">04 · Relatório — navegando entre plantas</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar"><div><div class="brand">Cotton<span>Map</span></div><div class="topsub">Relatório · T3 · Ponto 3</div></div></div>
+    <div class="screen">
+      <div class="plantNav">
+        <div class="arrow">‹</div>
+        <div class="center"><b>Planta 3</b><span>Altura 1.53 m</span></div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="reportCard" style="margin-top:12px;">
+        <h4>Planta 3 · nó a nó</h4>
+        <table class="rep">
+          <tr><th>Ramo</th><th>Pos.1</th><th>Pos.2</th><th>Pos.3</th></tr>
+          <tr><td>9</td><td>🍏</td><td>🌷</td><td></td></tr>
+          <tr><td>8</td><td>🍏</td><td>🍏</td><td></td></tr>
+          <tr><td>7</td><td>🍏</td><td></td><td></td></tr>
+          <tr><td>6</td><td>🍏</td><td>⚪</td><td></td></tr>
+          <tr><td>5</td><td colspan="3">sem estrutura</td></tr>
+        </table>
+        <div class="legend">
+          <span>🌱 Botão</span><span>🌷 Flor</span><span>🍏 Maçã v.</span>
+          <span>⚪ Capulho</span><span>🌀 Cavit.</span><span>💀 Aborto</span><span>🟤 Podre</span>
+        </div>
+      </div>
+      <button class="btn-ghost">✏️ Corrigir esta planta</button>
+      <button class="btn-primary">Exportar (.xlsx) ↗</button>
+    </div>
+  </div>
+  <p class="caption">As setas / pontinhos deixam ir planta por planta pra conferir e corrigir sem precisar exportar antes. Serve pra qualquer ponto/repetição.</p>
+</div>
+
+<div class="stage">
+  <p class="stagelabel">05 · Comparativo entre tratamentos</p>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="topbar"><div><div class="brand">Cotton<span>Map</span></div><div class="topsub">Comparativo · Lote 27</div></div></div>
+    <div class="screen">
+      <p class="breadcrumb">Aberto pelo ícone 📊 na tela 01 · Ensaio</p>
+      <div class="reportCard">
+        <h4>Capulhos / planta — média por tratamento</h4>
+        <div class="chartWrap">
+          <div class="chartCol"><span class="val">6,4</span><div class="bar low" style="height:53%; background:var(--cotton-2); border:1.5px solid #C9BE9E;"></div></div>
+          <div class="chartCol"><span class="val">9,1</span><div class="bar" style="height:76%; background:var(--leaf);"></div></div>
+          <div class="chartCol"><span class="val">8,3</span><div class="bar" style="height:69%; background:#9BAE8E;"></div></div>
+          <div class="chartCol"><span class="val">—</span><div class="bar" style="height:2%; background:var(--cotton-2); border:1.5px dashed var(--line);"></div></div>
+        </div>
+        <div class="chartAxis"><span>T1</span><span>T2</span><span>T3</span><span>T4</span></div>
+        <div class="cmpMeta">T4 ainda sem plantas avaliadas · média = repetições do tratamento</div>
+      </div>
+      <div class="reportCard">
+        <h4>Abortos / planta — média por tratamento</h4>
+        <div class="chartWrap">
+          <div class="chartCol"><span class="val">4,8</span><div class="bar" style="height:80%; background:var(--abort);"></div></div>
+          <div class="chartCol"><span class="val">2,1</span><div class="bar" style="height:35%; background:#C98787;"></div></div>
+          <div class="chartCol"><span class="val">3,0</span><div class="bar" style="height:50%; background:#C98787;"></div></div>
+          <div class="chartCol"><span class="val">—</span><div class="bar" style="height:2%; background:var(--cotton-2); border:1.5px dashed var(--line);"></div></div>
+        </div>
+        <div class="chartAxis"><span>T1</span><span>T2</span><span>T3</span><span>T4</span></div>
+      </div>
+      <button class="btn-primary">Exportar comparativo (.xlsx) ↗</button>
+    </div>
+  </div>
+  <p class="caption">Tocar no 📊 do topo da tela 01 abre este comparativo em gráfico de colunas — capulhos e abortos médios lado a lado entre todos os tratamentos do ensaio, igual à aba "Graficas" da planilha, só que já cruzando os tratamentos.</p>
+</div>
+
+</body>
+</html>
